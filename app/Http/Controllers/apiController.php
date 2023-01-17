@@ -12,19 +12,19 @@ use Illuminate\Support\Facades\Log;
 
 class apiController extends Controller
 {
-    function login(Request $request){
+    function getToken(Request $request)
+    {
         $credentials = $request->only(['email', 'password']);
 
-        if(Auth::attempt($credentials) === false){
+        if (Auth::attempt($credentials) === false) {
             return response()->json(data: 'Unauthorized', status: 401);
         }
 
         $user = Auth::user();
 
-        $token = $user->createToken(name: 'token');
+        $token = $user->createToken(name: 'token')->plainTextToken;
 
-        return response()->json($token->plainTextToken);
-
+        return response()->json($token, 201);
     }
 
     function create(Request $request)
@@ -32,7 +32,7 @@ class apiController extends Controller
         try {
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
             ]);
 
