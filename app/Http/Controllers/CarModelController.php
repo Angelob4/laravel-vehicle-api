@@ -13,33 +13,39 @@ class CarModelController extends Controller
         return response()->json(CarModel::get(), 200);
     }
 
-    function getById($id){
+    function getById($id)
+    {
 
         $validator = Validator::make(["id" => $id], [
             "id" => 'integer'
         ]);
 
-        if (! $validator->fails()) {
+        if (!$validator->fails()) {
             return response()->json(CarModel::where("id", $id)->first(), 200);
         }
-
         return response('BAD REQUEST', 400);
     }
 
-    function getCarModelByBrandId($brand_id){
+    function getCarModelByBrand($brand)
+    {
 
-        $validator = Validator::make(["id" => $brand_id], [
-            "id" => 'integer'
-        ]);
+        if (is_numeric($brand)) {
+            $carModels = CarModel::where('brand_id', $brand)->get();
+        } else {
 
-        if (! $validator->fails()) {
-            $carModels = CarModel::where('brand_id', $brand_id)->get();
-            if($carModels){
-                return response()->json($carModels, 200);
-            }
+            $carModels = CarModel::
+                join('brands', 'brands.id', 'car_models.brand_id')
+                ->where('brands.name',  $brand)
+                ->select('car_models.*', 'brands.name as brand_name')
+                ->get();
+            // select * from car_models join brands on car_models.brand_id = brands.id where brands.name = 'Fiat'
         }
 
-        return response('BAD REQUEST' .  $validator->errors(), 400);
+        if ($carModels) {
+            return response()->json($carModels, 200);
+        }
+
+        return response('BAD REQUEST', 400);
     }
 
     function getCarModelByIdWithBrand($id)
@@ -49,7 +55,7 @@ class CarModelController extends Controller
             "id" => 'integer'
         ]);
 
-        if (! $validator->fails()) {
+        if (!$validator->fails()) {
             try {
 
                 $carModel = CarModel::where('id', $id)
@@ -68,5 +74,21 @@ class CarModelController extends Controller
         }
 
         return response('BAD REQUEST', 400);
+    }
+
+    function getCarModelByBrandName($name)
+    {
+        $validator = Validator::make(['name' => $name], ['name' => 'string|required']);
+
+        if ($validator->fails()) {
+            return response('BAD REQUEST', 400);
+        } else {
+            $carModel = CarModel::where('name', $name)->get();
+
+            if ($carModel) {
+                return response()->json($carModel, 200);
+            }
+            return response('BAD REQUEST', 400);
+        }
     }
 }

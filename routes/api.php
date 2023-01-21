@@ -38,13 +38,7 @@ Route::middleware('auth:sanctum')->group(function(){
 
     Route::prefix('brands')->group(function(){
         Route::get('/', [BrandController::class, 'getAll']);
-        Route::get('/{id}/car-models', [CarModelController::class, 'getCarModelByBrandId']);
-    });
-
-    /** VEHICLES ROUTE */
-    Route::prefix('vehicles')->group(function(){
-        // Route::get('/brands/{brand_id}', [VehicleController::class, 'getAllVehicleModelsByBrandID'])->name('vehicle.getModels');
-        // Route::get('/usercar/{user_car}', [UserCarsController::class, 'getUserCarsByID'])->name('vehicle.userCar');
+        Route::get('/{brand}/car-models', [CarModelController::class, 'getCarModelByBrand']);
     });
 
 });
